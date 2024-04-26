@@ -1,30 +1,35 @@
-profiles{
-  standard {
-    process.executor = 'local'
-    docker.enabled = true
-  }
+#!/usr/bin/env nextflow
 
-  batch {
-    bucketDir = 's3://232123435055-batch/work'
-    aws{
-      region = 'us-east-1'
-      batch.cliPath = '/usr/local/bin/aws'
-    }
-    process{
-      executor = 'awsbatch'
-      queue = 'nextflow-batch-default-queue'
-      errorStrategy = { task.attempt < 2 ? 'retry' : 'finish' }
-      maxRetries = 1
-      maxErrors = '-1'
-      memory = { 4.GB * task.attempt}
-      
-      withLabel: cpus_8 {
-        cpus = 8
-        memory = { 28.GB * task.attempt}
-      }
-      withLabel: bigdisk {
-        queue = 'nextflow-batch-bigdisk-queue'
-      }
-    }
-  }
+// **** Included processes from modules ****
+include { example } from './modules/example'
+include { simulate_sce } from './modules/simulate-sce'
+
+// **** Parameter checks ****
+param_error = false
+
+// Set data release path
+if (!params.release_bucket) {
+  log.error("Release bucket not specified")
+  param_error = true
+}
+
+def release_dir = Utils.getReleasePath(params.release_bucket, params.release_prefix)
+
+if (!release_dir.exists()) {
+  log.error "Release directory does not exist: ${release_dir}"
+  param_error = true
+}
+
+if (param_error) {
+  System.exit(1)
+}
+
+// **** Main workflow ****
+workflow {
+  example()
+  // project channel of [project_id, project_path]
+  // project_ch = Channel.fromPath(Utils.getProjectPaths(release_dir))
+  //   .map{[it.name, it]} // name is the directory name, which will be SCPCP000000 format
+
+  // simulate_sce(project_ch)
 }

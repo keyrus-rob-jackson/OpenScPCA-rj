@@ -2,7 +2,7 @@
 
 // **** Included processes from modules ****
 include { example } from './modules/example'
-include { simulate_sce } from './modules/simulate-sce'
+#include { simulate_sce } from './modules/simulate-sce'
 
 // **** Parameter checks ****
 param_error = false

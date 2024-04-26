@@ -1,4 +1,4 @@
-params.sim_pubdir = 's3://openscpca-temp-simdata/test'
+params.sim_pubdir = 's3://232123435055-batch/test'
 params.simulate_sce_container = 'ccdl/openscpca-simulate-sce:latest'
 
 process permute_metadata {
